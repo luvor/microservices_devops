@@ -39,7 +39,7 @@ def update_user():
 
 
 def complete_user():
-    query = "UPDATE islambek_users SET status='completed' WHERE status='calculated';"
+    query = "UPDATE islambek_users SET status='completed';"
     cursor = conn.cursor()
     cursor.execute(query)
     conn.commit()
