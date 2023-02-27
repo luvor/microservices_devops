@@ -5,8 +5,12 @@ name = "pypi"
 
 [packages]
 psycopg2 = "*"
+pytest = "*"
+testcontainers = "*"
+sqlalchemy = "*"
 
 [dev-packages]
+black = "*"
 
 [requires]
 python_version = "3.10"

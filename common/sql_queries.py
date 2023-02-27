@@ -1,9 +1,10 @@
-
 from models.User import User
-from common.db import conn
+
+from sqlalchemy.engine import Connection
+from sqlalchemy import text
 
 
-def create_table_users():
+def create_table_users(conn: Connection):
     query = """
     CREATE TABLE IF NOT EXISTS islambek_users (
         id SERIAL PRIMARY KEY,
@@ -15,45 +16,52 @@ def create_table_users():
         )
     """
 
-    cursor = conn.cursor()
-    cursor.execute(query)
+    conn.execute(text(query))
     conn.commit()
 
 
-def insert_user(user: User):
+def insert_user(conn: Connection, user: User):
     query = """
     INSERT INTO islambek_users (first_name, last_name, email, created, status)
-    VALUES (%s, %s, %s, %s, %s)
+    VALUES (:first_name, :last_name, :email, :created, :status)
     """
 
-    cursor = conn.cursor()
-    cursor.execute(query, (user.first_name, user.last_name, user.email, user.created, user.status))
+    conn.execute(
+        text(query),
+        parameters={
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "created": user.created,
+            "status": user.status,
+        },
+    )
     conn.commit()
 
 
-def update_user():
+def update_user(conn: Connection):
     query = "UPDATE islambek_users SET status='calculated' WHERE status='new';"
-    cursor = conn.cursor()
-    cursor.execute(query)
+    conn.execute(text(query))
     conn.commit()
 
 
-def complete_user():
+def complete_user(conn: Connection):
     query = "UPDATE islambek_users SET status='completed';"
-    cursor = conn.cursor()
-    cursor.execute(query)
+    conn.execute(text(query))
     conn.commit()
 
 
-def get_users() -> list[User]:
+def get_users(conn: Connection) -> list[User]:
     query = "SELECT * FROM islambek_users;"
-    cursor = conn.cursor()
-    cursor.execute(query)
-    return [User(
-        id=user[0],
-        first_name=user[1],
-        last_name=user[2],
-        email=user[3],
-        created=user[4],
-        status=user[5],
-    ) for user in cursor.fetchall()]
+    users = conn.execute(text(query)).fetchall()
+    return [
+        User(
+            id=user[0],
+            first_name=user[1],
+            last_name=user[2],
+            email=user[3],
+            created=user[4],
+            status=user[5],
+        )
+        for user in users
+    ]
